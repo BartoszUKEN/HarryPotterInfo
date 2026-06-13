@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'postacieInfo.dart';
 
 class PostacieScreen extends StatefulWidget {
   const PostacieScreen({super.key});
@@ -34,32 +35,72 @@ class _PostacieScreenState extends State<PostacieScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Postacie z Harry'ego Pottera")),
-      body: laduje 
-        ? const Center(child: CircularProgressIndicator()) 
-        : ListView.builder(
-            itemCount: postacie.length,
-            itemBuilder: (context, index) {
-              final postac = postacie[index];
-              
-              String imie = postac['name'];
-              String dom = postac['house'] ?? 'Brak';
-              bool zyje = postac['alive'] ?? false;
-              String zdjecie = postac['image'] ?? '';
-
-              return ListTile(
-                leading: SizedBox(
-                  width: 50,
-                  height: 70,
-                  child: zdjecie.isNotEmpty 
-                      ? Image.network(zdjecie, fit: BoxFit.cover)
-                      : const Icon(Icons.person, size: 40),
-                ),
-                title: Text(imie),
-                subtitle: Text("Dom: $dom   |  ${zyje ? 'Żyje' : 'Nie żyje'}"),
-              );
-            },
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/hogwart.jpg"),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(Colors.black45, BlendMode.darken),
+              ),
+            ),
           ),
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              title: const Text("Postacie", style: TextStyle(color: Colors.white)),
+              iconTheme: const IconThemeData(color: Colors.white),
+            ),
+            body: laduje
+                ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                : ListView.separated(
+                    itemCount: postacie.length,
+                    separatorBuilder: (context, index) => const Divider(
+                      color: Colors.white24,
+                      indent: 20,
+                      endIndent: 20,
+                    ),
+                    itemBuilder: (context, index) {
+                      final postac = postacie[index];
+                      String imie = postac['name'];
+                      String dom = postac['house'] ?? 'Brak';
+                      bool zyje = postac['alive'] ?? false;
+                      String zdjecie = postac['image'] ?? '';
+
+                      return ListTile(
+                        leading: Container(
+                          width: 50,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: Colors.white10,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: zdjecie.isNotEmpty
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(zdjecie, fit: BoxFit.cover),
+                                )
+                              : const Icon(Icons.person, color: Colors.white),
+                        ),
+                        title: Text(imie, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        subtitle: Text("Dom: $dom  |  ${zyje ? 'Żyje' : 'Nie żyje'}", style: const TextStyle(color: Colors.white70)),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PostacieInfoScreen(postac: postac),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
